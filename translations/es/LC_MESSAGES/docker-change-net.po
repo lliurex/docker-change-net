@@ -1,0 +1,472 @@
+# Spanish translations for docker-change-net package.
+# Copyright (C) 2025 M.Angel Juan
+# This file is distributed under the same license as the docker-change-net package.
+# Automatically generated, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: docker-change-net 1.0\n"
+"Report-Msgid-Bugs-To: M.Angel Juan\n"
+"POT-Creation-Date: 2025-12-18 13:24+0100\n"
+"PO-Revision-Date: 2025-12-18 13:26+0100\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:77
+#, python-brace-format
+msgid "Invalid BIP CIDR '{cidr}': {error}"
+msgstr "BIP CIDR invalido '{cidr}': {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:86
+#, python-brace-format
+msgid "Invalid pool CIDR '{cidr}': {error}"
+msgstr "Pool CIDR invalido '{cidr}': {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:109
+#, python-brace-format
+msgid ""
+"IP {cidr} is not private (RFC 1918). Use: 10.0.0.0/8, 172.16.0.0/12, or "
+"192.168.0.0/16"
+msgstr ""
+"IP {cidr} no es privada (RFC 1918). Utilizar: 10.0.0.0/8, 172.16.0.0/12, o "
+"192.168.0.0/16"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:119
+msgid "Pool must be a dictionary"
+msgstr "Pool debe ser un diccionario"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:122
+msgid "Pool must contain 'base' and 'size' keys"
+msgstr "Pool debe contener claves 'base' y 'size'"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:131
+msgid "Size must be between 1 and 32"
+msgstr "El tamaño debe ser entre 1 y 32"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:137
+#, python-brace-format
+msgid "Size {size} cannot be less than base mask ({mask})"
+msgstr "El tamaño {size} no puede ser menor que la mascara base ({mask})"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:141
+#, python-brace-format
+msgid "Invalid size: {error}"
+msgstr "Tamaño invalido: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:189
+#, python-brace-format
+msgid "Conflict: {net1} and {net2} overlap"
+msgstr "Conflicto: {net1} and {net2} se solapan"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:191
+msgid "No conflicts"
+msgstr "Sin conflictos"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:193
+#, python-brace-format
+msgid "Error checking conflicts: {error}"
+msgstr "Error comprobando conflictos: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:223
+msgid "daemon.json must contain a JSON object"
+msgstr "daemon.json debe contener un objecto JSON"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:227
+#, python-brace-format
+msgid "daemon.json contains invalid JSON: {error}"
+msgstr "daemon.json contiene un JSON inválido: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:230
+#, python-brace-format
+msgid "No permissions to read {path}. Check file permissions"
+msgstr "Sin permiso para leer {path}. Comprueba los permisos del fichero"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:246
+#, python-brace-format
+msgid "Couldn't create backup from daemon.json: {error}"
+msgstr "No se puede crear una copia de seguridad de daemon.json: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:295
+#, python-brace-format
+msgid "Error writing configuration: {error}"
+msgstr "Error escribiendo la configuración: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:318
+msgid "Root user"
+msgstr "Usuario root"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:322
+#: /home/lliurex/git/docker-change-net/docker-change-net:336
+msgid "User in docker group"
+msgstr "Usuario en el grupo docker"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:324
+msgid "Insufficient permissions"
+msgstr "Permisos insuficientes"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:331
+msgid "Could not determine current user"
+msgstr "No puedo determinar el usuario actual"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:340
+msgid "Docker group is primary group"
+msgstr "El grupo primario docker"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:343
+msgid "Docker group does not exist"
+msgstr "El grupo docker no existe"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:345
+msgid "User not in docker group"
+msgstr "El usuario no está en el grupo docker"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:347
+#, python-brace-format
+msgid "Error checking group: {error}"
+msgstr "Error comprobando el grupo: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:364
+#, python-brace-format
+msgid "Error restarting Docker: {stderr}"
+msgstr "Error reiniciando Docker: {stderr}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:370
+#: /home/lliurex/git/docker-change-net/docker-change-net:791
+msgid "Docker restarted successfully"
+msgstr "Docker reiniciado correctamente"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:372
+msgid "Fail restarting Docker"
+msgstr "Fallo reiniciando Docker"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:375
+msgid "Timeout restarting Docker"
+msgstr "Timeout reiniciando Docker"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:377
+#, python-brace-format
+msgid "Unexpected error: {e}"
+msgstr "Error inesperado: {e}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:418
+msgid "Changes Docker network range by modifying daemon.json"
+msgstr "Cambia el rango de red de Docker modificando daemon.json"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:420
+msgid ""
+"\n"
+"Usage examples:\n"
+"  # Automatic mode (generates random ranges)\n"
+"  docker-change-net\n"
+"\n"
+"  # Change only default bridge\n"
+"  docker-change-net --bip 10.10.0.1/16\n"
+"\n"
+"  # Change only pools (size defaults to 24)\n"
+"  docker-change-net --pool-base 10.20.0.0/16\n"
+"\n"
+"  # Change pools with explicit size\n"
+"  docker-change-net --pool-base 10.20.0.0/16 --pool-size 24\n"
+"\n"
+"  # Change both\n"
+"  docker-change-net --bip 10.10.0.1/16 --pool-base 10.20.0.0/16 --pool-size "
+"24\n"
+"\n"
+"  # Multiple pools (all default to size 24)\n"
+"  docker-change-net --pool-base 10.20.0.0/16 --pool-base 10.30.0.0/16\n"
+"\n"
+"  # Multiple pools with mixed explicit/default sizes\n"
+"  docker-change-net --pool-base 10.20.0.0/16 --pool-size 24 --pool-base "
+"10.30.0.0/16\n"
+"\n"
+"  # Non-interactive mode\n"
+"  docker-change-net --auto -y\n"
+msgstr ""
+"\n"
+"Ejemplos de uso:\n"
+"  # Modo automatico (genera rangos aleatorios)\n"
+"  docker-change-net\n"
+"\n"
+"  # Cambiar solo el puente principal\n"
+"  docker-change-net --bip 10.10.0.1/16\n"
+"\n"
+"  # Cambiar solo los pools (size por defecto es 24)\n"
+"  docker-change-net --pool-base 10.20.0.0/16\n"
+"\n"
+"  # Cambiar los pools con tamaño explicito\n"
+"  docker-change-net --pool-base 10.20.0.0/16 --pool-size 24\n"
+"\n"
+"  # Cambiar ambos\n"
+"  docker-change-net --bip 10.10.0.1/16 --pool-base 10.20.0.0/16 --pool-size "
+"24\n"
+"\n"
+"  # Pools múltiples (todos por defecto con un size de 24)\n"
+"  docker-change-net --pool-base 10.20.0.0/16 --pool-base 10.30.0.0/16\n"
+"\n"
+"  # Pools múltiples con sizes mezclados/por defecto\n"
+"  docker-change-net --pool-base 10.20.0.0/16 --pool-size 24 --pool-base "
+"10.30.0.0/16\n"
+"\n"
+"  # Modo no interactivo\n"
+"  docker-change-net --auto -y\n"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:450
+msgid "Remove bip and pools from config"
+msgstr "Eliminar bip y pools de la configuración"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:455
+msgid "New CIDR range for default bridge (docker0)"
+msgstr "Nuevo rango CIDR para el puente principal (docker0)"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:462
+msgid ""
+"Base CIDR network range for address pool (e.g., 10.20.0.0/16). This defines "
+"the complete IP range available for the pool. Docker will create subnets "
+"from this range based on --pool-size. Use with --pool-size (defaults to 24 "
+"if not specified). Can be used multiple times for multiple pools."
+msgstr ""
+"Rango de red CIDR base para el pool de direcciones (ej., 10.20.0.0/16). Esto "
+"define el rango completo de IPs disponibles para el pool. Docker creará "
+"subredes a partir de este rango basado en --pool-size. Usar con --pool-size "
+"(por defecto 24 si no se especifica). Puede usarse múltiples veces para "
+"múltiples pools."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:474
+msgid ""
+"Subnet prefix length for networks created from the pool (1-32). This defines "
+"how large each Docker network will be. For example, size 24 creates /24 "
+"subnets (254 hosts each). Optional, defaults to 24 if not specified. Must be "
+">= the base network mask."
+msgstr ""
+"Longitud del prefijo de subred para redes creadas desde el pool (1-32). Esto "
+"define qué tan grande será cada red Docker. Por ejemplo, tamaño 24 crea "
+"subredes /24 (254 hosts cada una). Opcional, por defecto 24 si no se "
+"especifica. Debe ser >= la máscara de red base."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:485
+#, python-brace-format
+msgid "Path to daemon.json (default: {path})"
+msgstr "Ruta a daemon.json (por defecto: {path})"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:490
+msgid "Directory for backups (default: same as daemon.json)"
+msgstr ""
+"Directorio para copias de seguridad (por defecto: mismo que daemon.json)"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:495
+msgid "Do not ask for confirmation"
+msgstr "No preguntar por confirmación"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:500
+msgid "Generate random ranges automatically"
+msgstr "Generar rangos aleatorios automáticamente"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:512
+msgid "--pool-size provided but missing --pool-base arguments."
+msgstr "--pool-size proporcionado pero faltan argumentos --pool-base."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:522
+#, python-brace-format
+msgid ""
+"{bases} --pool-base argument(s) but {sizes} --pool-size argument(s). Cannot "
+"have more sizes than bases."
+msgstr ""
+"{bases} como argumentos --pool-base pero {sizes} como argumentos --pool-"
+"size. No puede haber más sizes que bases."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:534
+msgid "CURRENT CONFIGURATION FOR DOCKER DAEMON:"
+msgstr "CONFIGURACIÓN ACTUAL PARA EL DAEMON DE DOCKER:"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:540
+#, python-brace-format
+msgid "Default bridge (bip): {bip}"
+msgstr "Puente por defecto (bip): {bip}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:542
+msgid "Default bridge (bip): Not configured"
+msgstr "Puente por defecto (bip): No configurado"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:545
+#: /home/lliurex/git/docker-change-net/docker-change-net:569
+#: /home/lliurex/git/docker-change-net/docker-change-net:575
+msgid "Address pools:"
+msgstr "Pools de direcciones:"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:551
+msgid "Address pools: Not configured"
+msgstr "Pools de direcciones: No configurado"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:555
+msgid "PROPOSED CHANGES:"
+msgstr "CAMBIOS PROPUESTOS:"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:558
+#: /home/lliurex/git/docker-change-net/docker-change-net:565
+#: /home/lliurex/git/docker-change-net/docker-change-net:575
+msgid "Not configured"
+msgstr "No configurado"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:561
+#: /home/lliurex/git/docker-change-net/docker-change-net:565
+#, python-brace-format
+msgid "Default bridge (bip): {current} → {new}"
+msgstr "Puente por defecto (bip): {current} → {new}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:563
+#, python-brace-format
+msgid "Default bridge (bip): {bip} (no changes)"
+msgstr "Puente por defecto (bip): {bip} (sin cambios)"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:579
+msgid "WARNING: Restarting Docker will stop all running containers"
+msgstr ""
+"ADVERTENCIA: Reiniciar Docker detendrá todos los contenedores en ejecución"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:582
+msgid "Apply changes?"
+msgstr "¿Aplicar cambios?"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:588
+msgid "Please answer"
+msgstr "Por favor responda"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:593
+msgid "Docker Network Configuration Changer"
+msgstr "Cambiador de Configuración de Red de Docker"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:601
+msgid "CHANGES APPLIED SUCCESSFULLY"
+msgstr "CAMBIOS APLICADOS CORRECTAMENTE"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:605
+#, python-brace-format
+msgid "Backup available at: {path}"
+msgstr "Copia de seguridad disponible en: {path}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:606
+msgid "To manually restore:"
+msgstr "Para restaurar manualmente:"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:630
+msgid "Elevating privileges (requires docker group membership)..."
+msgstr "Elevando privilegios (requiere membresía en el grupo docker)..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:645
+msgid "Error insufficient permissions"
+msgstr "Error de permisos insuficientes"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:653
+msgid "Docker is not installed"
+msgstr "Docker no está instalado"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:656
+#, python-brace-format
+msgid "Docker installed ({version})"
+msgstr "Docker instalado ({version})"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:660
+msgid "Reading current configuration..."
+msgstr "Leyendo configuración actual..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:664
+msgid "daemon.json found"
+msgstr "daemon.json encontrado"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:667
+msgid "daemon.json does not exist, nothing to do"
+msgstr "daemon.json no existe, se creará uno nuevo"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:670
+msgid "daemon.json does not exist, will create a new one"
+msgstr "daemon.json no existe, se creará uno nuevo"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:672
+#: /home/lliurex/git/docker-change-net/docker-change-net:687
+#: /home/lliurex/git/docker-change-net/docker-change-net:727
+#: /home/lliurex/git/docker-change-net/docker-change-net:756
+#: /home/lliurex/git/docker-change-net/docker-change-net:765
+#: /home/lliurex/git/docker-change-net/docker-change-net:772
+#: /home/lliurex/git/docker-change-net/docker-change-net:784
+#, python-brace-format
+msgid "Error: {error}"
+msgstr "Error: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:691
+msgid "Generating valid random ranges..."
+msgstr "Generando rangos aleatorios válidos..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:702
+msgid "Ranges generated without conflicts"
+msgstr "Rangos generados sin conflictos"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:705
+msgid "Error: must provide at least --bip or --pool, or use --auto"
+msgstr "Error: debe proporcionar al menos --bip o --pool, o usar --auto"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:731
+#, python-brace-format
+msgid "Error: validation failed: {error}"
+msgstr "Error: validación fallida: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:738
+msgid "Same values that current configuration"
+msgstr "Mismos valores que la configuración actual"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:739
+msgid "No changes to apply"
+msgstr "No hay cambios que aplicar"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:746
+#: /home/lliurex/git/docker-change-net/docker-change-net:801
+msgid "Operation cancelled by user"
+msgstr "Operación cancelada por el usuario"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:751
+msgid "Creating backup..."
+msgstr "Creando copia de seguridad..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:754
+#, python-brace-format
+msgid "Backup created: {path}"
+msgstr "Copia de seguridad creada: {path}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:759
+msgid "Writing new configuration..."
+msgstr "Escribiendo nueva configuración..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:763
+msgid "Configuration updated"
+msgstr "Configuración actualizada"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:768
+msgid "Restarting Docker service..."
+msgstr "Reiniciando el servicio Docker..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:776
+msgid "Attempting to restore previous configuration..."
+msgstr "Intentando restaurar la configuración anterior..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:782
+#, python-brace-format
+msgid "Rollback: {message}"
+msgstr "Rollback: {message}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:785
+msgid "Manual restoration required:"
+msgstr "Restauración manual requerida:"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:804
+#, python-brace-format
+msgid "Unexpected error: {error}"
+msgstr "Error inesperado: {error}"
+
+#, python-brace-format
+#~ msgid "IP {cidr_string} is not private (RFC 1918). "
+#~ msgstr "IP {cidr_string} no es privada (RFC 1918). "

@@ -1,0 +1,17 @@
+# Sudoers file for docker-change-net
+#
+# This file allows users in the docker group to execute
+# docker-change-net and necessary systemctl commands without password.
+#
+# Installation:
+#   sudo cp docker-change-net-sudoers /etc/sudoers.d/docker-change-net
+#   sudo chmod 440 /etc/sudoers.d/docker-change-net
+#   sudo visudo -c -f /etc/sudoers.d/docker-change-net
+#
+# IMPORTANT: Always validate with visudo before using in production
+# NOTE: Files in /etc/sudoers.d/ must NOT contain dots (.) in the filename
+#
+
+# Allows users in docker group to execute docker-change-net
+# Script auto-elevates and runs as root, so no systemctl entries needed
+%docker ALL=(ALL) NOPASSWD: /usr/bin/docker-change-net

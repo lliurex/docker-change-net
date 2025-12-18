@@ -1,0 +1,807 @@
+#!/usr/bin/env python3
+"""
+Docker Network Configuration Changer
+
+Script to change Docker network range by modifying daemon.json.
+Supports RFC 1918 private range validation, automatic backups,
+and rollback on failure.
+
+Author: M.Angel Juan
+License: GPL 3
+"""
+
+import argparse
+import json
+import os
+import sys
+import subprocess
+import shutil
+import ipaddress
+import random
+import time
+import grp
+import pwd
+from datetime import datetime
+from pathlib import Path
+import gettext
+import locale
+
+def setup_i18n():
+    """Setup internationalization with automatic language detection"""
+    locale_dir = '/usr/share/locale'
+
+    try:
+        # Detect system language from LANG or LANGUAGE environment variables
+        # Priority: LANGUAGE > LANG > default
+        lang_env = os.environ.get('LANGUAGE') or os.environ.get('LANG', '').split('.')[0]
+
+        # LANG=ca_ES.utf-8@valencia or LANGUAGE=ca@valencia
+        if 'valencia' in lang_env.lower() or lang_env.startswith('ca'):
+            languages = ['va', 'ca']
+        elif lang_env:
+            lang_code = lang_env.split('_')[0].split('@')[0]
+            languages = [lang_code]
+        else:
+            languages = ['en']
+
+        lang = gettext.translation(
+            'docker-change-net',
+            localedir=locale_dir,
+            languages=languages,
+            fallback=True
+        )
+        return lang.gettext
+    except Exception:
+        return lambda s: s
+
+_ = setup_i18n()
+
+DAEMON_JSON_PATH = '/etc/docker/daemon.json'
+PRIVATE_RANGES = [
+    ipaddress.IPv4Network('10.0.0.0/8'),
+    ipaddress.IPv4Network('172.16.0.0/12'),
+    ipaddress.IPv4Network('192.168.0.0/16'),
+]
+
+
+class IPValidator:
+    """CIDR range validator and random range generator"""
+
+    @staticmethod
+    def validate_bip_cidr(cidr_string):
+        """Validates BIP CIDR format (allows host IPs)"""
+        try:
+            network = ipaddress.IPv4Network(cidr_string, strict=False)
+            return network
+        except (ipaddress.AddressValueError, ipaddress.NetmaskValueError, ValueError) as e:
+            raise ValueError(_("Invalid BIP CIDR '{cidr}': {error}").format(cidr=cidr_string, error=e))
+
+    @staticmethod
+    def validate_pool_cidr(cidr_string):
+        """Validates pool CIDR format (requires network address)"""
+        try:
+            network = ipaddress.IPv4Network(cidr_string, strict=True)
+            return network
+        except (ipaddress.AddressValueError, ipaddress.NetmaskValueError, ValueError) as e:
+            raise ValueError(_("Invalid pool CIDR '{cidr}': {error}").format(cidr=cidr_string, error=e))
+
+    @staticmethod
+    def is_private_ip(cidr_string):
+        """Checks if IP is in private ranges"""
+        try:
+            network = ipaddress.IPv4Network(cidr_string, strict=False)
+            network_addr = network.network_address
+
+            return any(network_addr in private_range for private_range in PRIVATE_RANGES)
+        except Exception:
+            return False
+
+    @staticmethod
+    def validate_private_cidr(cidr_string, is_bip=False):
+        """Validates CIDR is valid and private"""
+        if is_bip:
+            network = IPValidator.validate_bip_cidr(cidr_string)
+        else:
+            network = IPValidator.validate_pool_cidr(cidr_string)
+
+        if not IPValidator.is_private_ip(cidr_string):
+            raise ValueError(
+                _("IP {cidr} is not private (RFC 1918). "
+                  "Use: 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16").format(cidr=cidr_string)
+            )
+
+        return network
+
+    @staticmethod
+    def validate_pool_entry(pool_dict):
+        """Validates pool entry"""
+        if not isinstance(pool_dict, dict):
+            raise ValueError(_("Pool must be a dictionary"))
+
+        if 'base' not in pool_dict or 'size' not in pool_dict:
+            raise ValueError(_("Pool must contain 'base' and 'size' keys"))
+
+        # Validate base CIDR (must be network address)
+        IPValidator.validate_private_cidr(pool_dict['base'], is_bip=False)
+
+        # Validate size
+        try:
+            size = int(pool_dict['size'])
+            if size < 1 or size > 32:
+                raise ValueError(_("Size must be between 1 and 32"))
+
+            # Validate that size >= base mask
+            base_network = ipaddress.IPv4Network(pool_dict['base'])
+            if size < base_network.prefixlen:
+                raise ValueError(
+                    _("Size {size} cannot be less than base mask "
+                      "({mask})").format(size=size, mask=base_network.prefixlen)
+                )
+        except (ValueError, TypeError) as e:
+            raise ValueError(_("Invalid size: {error}").format(error=e))
+
+        return pool_dict
+
+    @staticmethod
+    def generate_random_bip():
+        """Generates random valid CIDR"""
+        # Use 10.0.0.0/8 range to avoid conflicts
+        # Avoid 10.0-9.x.x to reduce conflicts with common ranges
+        second_octet = random.randint(10, 250)
+        return f"10.{second_octet}.0.1/16"
+
+    @staticmethod
+    def generate_random_pools(count=2, avoid_octets=None):
+        """Generates N non-overlapping pools"""
+        pools = []
+        used_octets = avoid_octets or set()
+
+        for _ in range(count):
+            # Generate unique second octet
+            attempts = 0
+            while attempts < 100:
+                second_octet = random.randint(20, 250)
+                if second_octet not in used_octets:
+                    used_octets.add(second_octet)
+                    break
+                attempts += 1
+            else:
+                # Fallback if unique octet not found
+                second_octet = random.randint(20, 250)
+
+            pools.append({
+                "base": f"10.{second_octet}.0.0/16",
+                "size": 24
+            })
+
+        return pools
+
+    @staticmethod
+    def check_cidr_conflicts(cidr_list):
+        """Checks CIDRs do not overlap"""
+        try:
+            networks = [ipaddress.IPv4Network(cidr, strict=False)
+                       for cidr in cidr_list]
+
+            for i, net1 in enumerate(networks):
+                for net2 in networks[i+1:]:
+                    if net1.overlaps(net2):
+                        return False, _("Conflict: {net1} and {net2} overlap").format(net1=net1, net2=net2)
+
+            return True, _("No conflicts")
+        except Exception as e:
+            return False, _("Error checking conflicts: {error}").format(error=e)
+
+
+class DockerConfigManager:
+    """Daemon.json configuration manager"""
+
+    def __init__(self, daemon_json_path=DAEMON_JSON_PATH, backup_dir=None):
+        """Initializes manager"""
+        self.daemon_json_path = daemon_json_path
+        self.backup_dir = backup_dir or os.path.dirname(daemon_json_path)
+
+    def file_exists(self):
+        """Checks if daemon.json exists"""
+        return os.path.isfile(self.daemon_json_path)
+
+    def read_config(self):
+        """Reads daemon.json"""
+        if not self.file_exists():
+            return {}
+
+        try:
+            with open(self.daemon_json_path, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+
+                if not content:
+                    return {}
+
+                config = json.loads(content)
+
+                if not isinstance(config, dict):
+                    raise ValueError(_("daemon.json must contain a JSON object"))
+
+                return config
+        except json.JSONDecodeError as e:
+            raise ValueError(_("daemon.json contains invalid JSON: {error}").format(error=e))
+        except PermissionError:
+            raise PermissionError(
+                _("No permissions to read {path}. "
+                  "Check file permissions").format(path=self.daemon_json_path)
+            )
+
+    def create_backup(self):
+        if not self.file_exists():
+            return None
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_filename = f"daemon.json.backup.{timestamp}"
+        backup_path = os.path.join(self.backup_dir, backup_filename)
+
+        try:
+            shutil.copy2(self.daemon_json_path, backup_path)
+            return backup_path
+        except (IOError, OSError) as e:
+            raise IOError(_("Couldn't create backup from daemon.json: {error}").format(error=e))
+
+    def get_current_network_config(self):
+        config = self.read_config()
+
+        return config
+
+    def update_config(self, new_bip=None, new_pools=None):
+        config = self.read_config()
+
+        if None == new_bip == new_pools:
+            if 'bip' in config:
+                del config['bip']
+            if 'default-address-pools' in config:
+                del config['default-address-pools']
+            return config
+
+        if new_bip is not None:
+            config['bip'] = new_bip
+
+        if new_pools is not None:
+            config['default-address-pools'] = new_pools
+
+        return config
+
+    def write_config(self, config_dict):
+        # Create temporary file in the same directory
+        temp_path = self.daemon_json_path + '.tmp'
+
+        try:
+            # Write to temporary
+            with open(temp_path, 'w', encoding='utf-8') as f:
+                json.dump(config_dict, f, indent=2, ensure_ascii=False)
+                f.write('\n')
+
+            # Change permissions
+            os.chmod(temp_path, 0o644)
+
+            # Atomic rename
+            shutil.move(temp_path, self.daemon_json_path)
+
+            return True
+        except (IOError, OSError, PermissionError) as e:
+            # Clean up temporary file if it exists
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
+            raise IOError(_("Error writing configuration: {error}").format(error=e))
+
+
+class DockerServiceManager:
+    @staticmethod
+    def check_docker_installed():
+        try:
+            result = subprocess.run(
+                ['docker', '--version'],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if result.returncode == 0:
+                version = result.stdout.strip()
+                return True, version
+            return False, None
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return False, None
+
+    @staticmethod
+    def check_permissions():
+        if os.geteuid() == 0:
+            return True, 'root', _('Root user')
+
+        is_in_docker_group, msg = DockerServiceManager.is_in_docker_group()
+        if is_in_docker_group:
+            return True, 'docker_group', _('User in docker group')
+
+        return False, 'none', _('Insufficient permissions')
+
+    @staticmethod
+    def is_in_docker_group():
+        try:
+            username = os.getenv('USER') or os.getenv('USERNAME')
+            if not username:
+                return False, _('Could not determine current user')
+
+            try:
+                docker_group = grp.getgrnam('docker')
+                if username in docker_group.gr_mem:
+                    return True, _('User in docker group')
+
+                user_info = pwd.getpwnam(username)
+                if user_info.pw_gid == docker_group.gr_gid:
+                    return True, _('Docker group is primary group')
+
+            except KeyError:
+                return False, _('Docker group does not exist')
+
+            return False, _('User not in docker group')
+        except Exception as e:
+            return False, _('Error checking group: {error}').format(error=e)
+
+    @staticmethod
+    def restart_docker_service(use_sudo=False):
+        cmd = ['systemctl', 'restart', 'docker']
+        if use_sudo:
+            cmd = ['sudo'] + cmd
+
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode != 0:
+                return False, _("Error restarting Docker: {stderr}").format(stderr=result.stderr)
+
+            time.sleep(3)
+
+            is_active = DockerServiceManager.verify_docker_running(use_sudo)
+            if is_active:
+                return True, _("Docker restarted successfully")
+            else:
+                return False, _("Fail restarting Docker")
+
+        except subprocess.TimeoutExpired:
+            return False, _("Timeout restarting Docker")
+        except Exception as e:
+            return False, _(f"Unexpected error: {e}")
+
+    @staticmethod
+    def verify_docker_running(use_sudo=False):
+        cmd = ['systemctl', 'is-active', 'docker']
+        if use_sudo:
+            cmd = ['sudo'] + cmd
+
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            return result.returncode == 0 and result.stdout.strip() == 'active'
+        except:
+            return False
+
+    @staticmethod
+    def rollback_configuration(backup_path, daemon_json_path, use_sudo=False):
+        print(f"Restoring configuration from backup...")
+
+        try:
+            shutil.copy2(backup_path, daemon_json_path)
+
+            success, msg = DockerServiceManager.restart_docker_service(use_sudo)
+
+            if success:
+                return True, "Configuration restored successfully from backup"
+            else:
+                return False, f"Configuration restored but Docker won't start: {msg}"
+        except Exception as e:
+            return False, f"Error during rollback: {e}"
+
+
+class CLIInterface:
+
+    @staticmethod
+    def setup_argparse():
+        parser = argparse.ArgumentParser(
+            description=_('Changes Docker network range by modifying daemon.json'),
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog=_('''
+Usage examples:
+  # Automatic mode (generates random ranges)
+  docker-change-net
+
+  # Change only default bridge
+  docker-change-net --bip 10.10.0.1/16
+
+  # Change only pools (size defaults to 24)
+  docker-change-net --pool-base 10.20.0.0/16
+
+  # Change pools with explicit size
+  docker-change-net --pool-base 10.20.0.0/16 --pool-size 24
+
+  # Change both
+  docker-change-net --bip 10.10.0.1/16 --pool-base 10.20.0.0/16 --pool-size 24
+
+  # Multiple pools (all default to size 24)
+  docker-change-net --pool-base 10.20.0.0/16 --pool-base 10.30.0.0/16
+
+  # Multiple pools with mixed explicit/default sizes
+  docker-change-net --pool-base 10.20.0.0/16 --pool-size 24 --pool-base 10.30.0.0/16
+
+  # Non-interactive mode
+  docker-change-net --auto -y
+''')
+        )
+        parser.add_argument(
+            '--default',
+            action='store_true',
+            help=_('Remove bip and pools from config')
+        )
+        parser.add_argument(
+            '--bip',
+            type=str,
+            help=_('New CIDR range for default bridge (docker0)')
+        )
+        parser.add_argument(
+            '--pool-base',
+            action='append',
+            type=str,
+            help=_(
+                'Base CIDR network range for address pool (e.g., 10.20.0.0/16). '
+                'This defines the complete IP range available for the pool. '
+                'Docker will create subnets from this range based on --pool-size. '
+                'Use with --pool-size (defaults to 24 if not specified). '
+                'Can be used multiple times for multiple pools.'
+            )
+        )
+        parser.add_argument(
+            '--pool-size',
+            action='append',
+            type=int,
+            help=_(
+                'Subnet prefix length for networks created from the pool (1-32). '
+                'This defines how large each Docker network will be. '
+                'For example, size 24 creates /24 subnets (254 hosts each). '
+                'Optional, defaults to 24 if not specified. '
+                'Must be >= the base network mask.'
+            )
+        )
+        parser.add_argument(
+            '--daemon-json',
+            type=str,
+            default=DAEMON_JSON_PATH,
+            help=_('Path to daemon.json (default: {path})').format(path=DAEMON_JSON_PATH)
+        )
+        parser.add_argument(
+            '--backup-dir',
+            type=str,
+            help=_('Directory for backups (default: same as daemon.json)')
+        )
+        parser.add_argument(
+            '-y', '--yes',
+            action='store_true',
+            help=_('Do not ask for confirmation')
+        )
+        parser.add_argument(
+            '--auto',
+            action='store_true',
+            help=_('Generate random ranges automatically')
+        )
+
+        return parser
+
+    @staticmethod
+    def parse_pool_arguments(pool_bases, pool_sizes):
+        """Pairs pool-base and pool-size arguments into pool dictionaries"""
+        if pool_bases is None and pool_sizes is None:
+            return None
+
+        if pool_bases is None:
+            raise ValueError(_("--pool-size provided but missing --pool-base arguments."))
+
+        if pool_sizes is None:
+            pool_sizes = [24] * len(pool_bases)
+
+        if len(pool_sizes) < len(pool_bases):
+            pool_sizes = pool_sizes + [24] * (len(pool_bases) - len(pool_sizes))
+
+        if len(pool_sizes) > len(pool_bases):
+            raise ValueError(
+                _("{bases} --pool-base argument(s) but {sizes} --pool-size argument(s). "
+                  "Cannot have more sizes than bases.").format(bases=len(pool_bases), sizes=len(pool_sizes))
+            )
+
+        pools = []
+        for base, size in zip(pool_bases, pool_sizes):
+            pools.append({"base": base, "size": size})
+
+        return pools
+
+    @staticmethod
+    def display_current_config(config):
+        print(_("CURRENT CONFIGURATION FOR DOCKER DAEMON:"))
+
+        bip = config.get('bip')
+        pools = config.get('default-address-pools')
+
+        if bip:
+            print(_("Default bridge (bip): {bip}").format(bip=bip))
+        else:
+            print(_("Default bridge (bip): Not configured"))
+
+        if pools:
+            print(_("Address pools:"))
+            for pool in pools:
+                base = pool.get('base', 'N/A')
+                size = pool.get('size', 'N/A')
+                print(f"- base: {base}, size: {size}")
+        else:
+            print(_("Address pools: Not configured"))
+
+    @staticmethod
+    def display_proposed_changes(current, new_bip, new_pools):
+        print(_("PROPOSED CHANGES:"))
+
+        # Changes in bip
+        current_bip = current.get('bip') or _('Not configured')
+        if new_bip:
+            if new_bip != current_bip:
+                print(_("Default bridge (bip): {current} → {new}").format(current=current_bip, new=new_bip))
+            else:
+                print(_("Default bridge (bip): {bip} (no changes)").format(bip=new_bip))
+        else:
+            print(_("Default bridge (bip): {current} → {new}").format(current=current_bip, new=_('Not configured')))
+
+        # Changes in pools
+        if new_pools:
+            print(_("Address pools:"))
+            for pool in new_pools:
+                base = pool.get('base', 'N/A')
+                size = pool.get('size', 'N/A')
+                print(f"- base: {base}, size: {size}")
+        else:
+            print(_("Address pools:")+" "+_("Not configured"))
+
+    @staticmethod
+    def confirm_changes():
+        print(_("WARNING: Restarting Docker will stop all running containers"))
+
+        while True:
+            response = input(_("Apply changes?")+" (y/n): ").strip().lower()
+            if response in ['y', 'yes']:
+                return True
+            elif response in ['n', 'no']:
+                return False
+            else:
+                print(_("Please answer")+" 'y' or 'n'")
+
+
+def print_header():
+    print("=" * 65)
+    print(" " * 15 + _("Docker Network Configuration Changer"))
+    print("=" * 65)
+    print()
+
+
+def print_success(backup_path):
+    print()
+    print("=" * 65)
+    print(" " * 18 + _("CHANGES APPLIED SUCCESSFULLY"))
+    print("=" * 65)
+
+    if backup_path:
+        print(_("Backup available at: {path}").format(path=backup_path))
+        print(_("To manually restore:"))
+        print(f"    sudo cp {backup_path} {DAEMON_JSON_PATH}")
+        print("    sudo systemctl restart docker")
+    print()
+
+
+def main():
+    parser = CLIInterface.setup_argparse()
+    args = parser.parse_args()
+    
+    options = ['auto', 'backup_dir', 'bip', 'default', 'pool_base', 'pool_size', 'yes']
+    args_dict = vars(args)
+    used_options = [ opt for opt in options if args_dict.get(opt) ]
+    if not used_options:
+        parser.print_help()
+        sys.exit(0)
+
+    # Auto-elevate if not running as root
+    if os.geteuid() != 0:
+        # Check if user is in docker group
+        try:
+            is_in_group, msg = DockerServiceManager.is_in_docker_group()
+            if is_in_group:
+                # Re-execute script with sudo, preserving all arguments
+                print(_("Elevating privileges (requires docker group membership)..."))
+                cmd = ['sudo', sys.executable] + sys.argv
+                os.execvp('sudo', cmd)
+        except KeyError:
+            # Docker group doesn't exist, continue to permission check
+            pass
+        except Exception:
+            # Other errors, continue to permission check
+            pass
+
+    print_header()
+
+    has_permission, perm_type, perm_msg = DockerServiceManager.check_permissions()
+
+    if not has_permission:
+        print(_("Error insufficient permissions"))
+        sys.exit(1)
+
+    use_sudo = perm_type == 'docker_group'
+
+    is_installed, version = DockerServiceManager.check_docker_installed()
+
+    if not is_installed:
+        print(_("Docker is not installed"))
+        sys.exit(1)
+
+    print(_("Docker installed ({version})").format(version=version))
+
+    config_manager = DockerConfigManager(args.daemon_json, args.backup_dir)
+
+    print(_("Reading current configuration..."))
+    try:
+        current_config = config_manager.get_current_network_config()
+        if config_manager.file_exists():
+            print(_("daemon.json found"))
+        else:
+            if args.default:
+                print(_("daemon.json does not exist, nothing to do"))
+                sys.exit(0)
+            else:
+                print(_("daemon.json does not exist, will create a new one"))
+    except (ValueError, PermissionError) as e:
+        print(_("Error: {error}").format(error=e))
+        sys.exit(1)
+
+    CLIInterface.display_current_config(current_config)
+
+    if args.default:
+        new_bip = None
+        new_pools = None
+    else:
+        new_bip = args.bip
+        new_pools = None
+
+        try:
+            new_pools = CLIInterface.parse_pool_arguments(args.pool_base, args.pool_size)
+        except ValueError as e:
+            print(_("Error: {error}").format(error=e))
+            sys.exit(1)
+
+        if args.auto or (not new_bip and not new_pools):
+            print(_("Generating valid random ranges..."))
+
+            if not new_bip:
+                new_bip = IPValidator.generate_random_bip()
+
+            if not new_pools:
+                # Extract octet from bip to avoid conflicts
+                bip_octets = new_bip.split('.')[1]
+                avoid_octets = {int(bip_octets)}
+                new_pools = IPValidator.generate_random_pools(2, avoid_octets)
+
+            print(_("Ranges generated without conflicts"))
+
+        if not new_bip and not new_pools:
+            print(_("Error: must provide at least --bip or --pool, or use --auto"))
+            parser.print_help()
+            sys.exit(1)
+
+        try:
+            if new_bip:
+                IPValidator.validate_private_cidr(new_bip, is_bip=True)
+
+            if new_pools:
+                for pool in new_pools:
+                    IPValidator.validate_pool_entry(pool)
+
+            # Check conflicts
+            all_cidrs = []
+            if new_bip:
+                all_cidrs.append(new_bip)
+            if new_pools:
+                all_cidrs.extend([p['base'] for p in new_pools])
+
+            if len(all_cidrs) > 1:
+                success, msg = IPValidator.check_cidr_conflicts(all_cidrs)
+                if not success:
+                    print(_("Error: {error}").format(error=msg))
+                    sys.exit(1)
+
+        except ValueError as e:
+            print(_("Error: validation failed: {error}").format(error=e))
+            sys.exit(1)
+
+        current_bip = current_config.get('bip')
+        current_pools = current_config.get('default-address-pools')
+
+        if new_bip == current_bip and new_pools == current_pools:
+            print(_("Same values that current configuration"))
+            print(_("No changes to apply"))
+            sys.exit(0)
+
+    CLIInterface.display_proposed_changes(current_config, new_bip, new_pools)
+
+    if not args.yes:
+        if not CLIInterface.confirm_changes():
+            print(_("Operation cancelled by user"))
+            sys.exit(0)
+
+    backup_path = None
+    if config_manager.file_exists():
+        print(_("Creating backup..."))
+        try:
+            backup_path = config_manager.create_backup()
+            print(_("Backup created: {path}").format(path=backup_path))
+        except IOError as e:
+            print(_("Error: {error}").format(error=e))
+            sys.exit(1)
+
+    print(_("Writing new configuration..."))
+    try:
+        updated_config = config_manager.update_config(new_bip, new_pools)
+        config_manager.write_config(updated_config)
+        print(_("Configuration updated"))
+    except (IOError, PermissionError) as e:
+        print(_("Error: {error}").format(error=e))
+        sys.exit(1)
+
+    print(_("Restarting Docker service..."))
+    success, msg = DockerServiceManager.restart_docker_service(use_sudo)
+
+    if not success:
+        print(_("Error: {error}").format(error=msg))
+
+        # Try rollback
+        if backup_path:
+            print(_("Attempting to restore previous configuration..."))
+            rollback_success, rollback_msg = DockerServiceManager.rollback_configuration(
+                backup_path, args.daemon_json, use_sudo
+            )
+
+            if rollback_success:
+                print(_("Rollback: {message}").format(message=rollback_msg))
+            else:
+                print(_("Error: {error}").format(error=rollback_msg))
+                print(_("Manual restoration required:"))
+                print(f"    sudo cp {backup_path} {args.daemon_json}")
+                print("    sudo systemctl restart docker")
+
+        sys.exit(1)
+
+    print(_("Docker restarted successfully"))
+
+    print_success(backup_path)
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(_("Operation cancelled by user"))
+        sys.exit(130)
+    except Exception as e:
+        print(_("Unexpected error: {error}").format(error=e))
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
