@@ -17,7 +17,6 @@ import sys
 import subprocess
 import shutil
 import ipaddress
-import random
 import time
 import grp
 import pwd
@@ -61,6 +60,10 @@ PRIVATE_RANGES = [
     ipaddress.IPv4Network('10.0.0.0/8'),
     ipaddress.IPv4Network('172.16.0.0/12'),
     ipaddress.IPv4Network('192.168.0.0/16'),
+]
+BLACKLIST_PATHS = [
+    '/usr/share/docker-change-net/blacklist.txt',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blacklist.txt')
 ]
 
 
@@ -113,6 +116,46 @@ class IPValidator:
         return network
 
     @staticmethod
+    def load_blacklist(blacklist_paths=None):
+        """Load blacklist file and return set of IPv4Networks"""
+        paths_to_try = blacklist_paths or BLACKLIST_PATHS
+
+        blacklist = set()
+        for path in paths_to_try:
+            if path and os.path.isfile(path):
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        for line in f:
+                            line = line.strip()
+                            if line and not line.startswith('#'):
+                                try:
+                                    net = ipaddress.IPv4Network(line, strict=False)
+                                    blacklist.add(net)
+                                except (ipaddress.AddressValueError, ipaddress.NetmaskValueError, ValueError):
+                                    pass
+                    return blacklist
+                except (IOError, OSError):
+                    continue
+
+        return blacklist
+
+    @staticmethod
+    def check_against_blacklist(cidr_string, blacklist):
+        """Check if CIDR conflicts with any blacklisted range"""
+        if not blacklist:
+            return True, _("No blacklist conflicts")
+
+        try:
+            test_net = ipaddress.IPv4Network(cidr_string, strict=False)
+            for blacklist_net in blacklist:
+                if test_net.overlaps(blacklist_net):
+                    return False, _("Conflicts with blacklist: {test} overlaps {bl}").format(
+                        test=test_net, bl=blacklist_net)
+            return True, _("No blacklist conflicts")
+        except Exception as e:
+            return False, str(e)
+
+    @staticmethod
     def validate_pool_entry(pool_dict):
         """Validates pool entry"""
         if not isinstance(pool_dict, dict):
@@ -143,36 +186,96 @@ class IPValidator:
         return pool_dict
 
     @staticmethod
-    def generate_random_bip():
-        """Generates random valid CIDR"""
-        # Use 10.0.0.0/8 range to avoid conflicts
-        # Avoid 10.0-9.x.x to reduce conflicts with common ranges
-        second_octet = random.randint(10, 250)
-        return f"10.{second_octet}.0.1/16"
+    def generate_first_available_bip(blacklist=None):
+        """Find first available BIP sequentially"""
+        blacklist = blacklist or set()
+
+        # Try 10.0.0.0/8 range
+        for octet in range(10, 251):
+            candidate = f"10.{octet}.0.1/16"
+            success, _ = IPValidator.check_against_blacklist(candidate, blacklist)
+            if success:
+                return candidate
+
+        # Try 172.16.0.0/12 range
+        for octet in range(16, 32):
+            candidate = f"172.{octet}.0.1/16"
+            success, _ = IPValidator.check_against_blacklist(candidate, blacklist)
+            if success:
+                return candidate
+
+        # Try 192.168.0.0/16 range
+        for octet in range(0, 256):
+            candidate = f"192.168.{octet}.1/24"
+            success, _ = IPValidator.check_against_blacklist(candidate, blacklist)
+            if success:
+                return candidate
+
+        raise RuntimeError(
+            _("Could not find available IP range in any private range (10/172/192)")
+        )
 
     @staticmethod
-    def generate_random_pools(count=2, avoid_octets=None):
-        """Generates N non-overlapping pools"""
+    def generate_first_available_pools(count=2, avoid_octets=None, blacklist=None):
+        """Find first N available pools sequentially"""
         pools = []
-        used_octets = avoid_octets or set()
+        used_octets_10 = avoid_octets or set()
+        used_octets_172 = set()
+        used_octets_192 = set()
+        blacklist = blacklist or set()
 
-        for _ in range(count):
-            # Generate unique second octet
-            attempts = 0
-            while attempts < 100:
-                second_octet = random.randint(20, 250)
-                if second_octet not in used_octets:
-                    used_octets.add(second_octet)
+        for pool_num in range(count):
+            found = False
+
+            # Try 10.0.0.0/8 range
+            for octet in range(10, 251):
+                if octet in used_octets_10:
+                    continue
+
+                candidate = f"10.{octet}.0.0/16"
+                success, _ = IPValidator.check_against_blacklist(candidate, blacklist)
+                if success:
+                    used_octets_10.add(octet)
+                    pools.append({"base": candidate, "size": 24})
+                    found = True
                     break
-                attempts += 1
-            else:
-                # Fallback if unique octet not found
-                second_octet = random.randint(20, 250)
 
-            pools.append({
-                "base": f"10.{second_octet}.0.0/16",
-                "size": 24
-            })
+            if found:
+                continue
+
+            # Try 172.16.0.0/12 range
+            for octet in range(16, 32):
+                if octet in used_octets_172:
+                    continue
+
+                candidate = f"172.{octet}.0.0/16"
+                success, _ = IPValidator.check_against_blacklist(candidate, blacklist)
+                if success:
+                    used_octets_172.add(octet)
+                    pools.append({"base": candidate, "size": 24})
+                    found = True
+                    break
+
+            if found:
+                continue
+
+            # Try 192.168.0.0/16 range
+            for octet in range(0, 256):
+                if octet in used_octets_192:
+                    continue
+
+                candidate = f"192.168.{octet}.0/24"
+                success, _ = IPValidator.check_against_blacklist(candidate, blacklist)
+                if success:
+                    used_octets_192.add(octet)
+                    pools.append({"base": candidate, "size": 24})
+                    found = True
+                    break
+
+            if not found:
+                raise RuntimeError(
+                    _("Could not generate pool {num}: no available ranges").format(num=pool_num + 1)
+                )
 
         return pools
 
@@ -657,6 +760,14 @@ def main():
 
     config_manager = DockerConfigManager(args.daemon_json, args.backup_dir)
 
+    # Load blacklist
+    print(_("Loading blacklist..."))
+    blacklist = IPValidator.load_blacklist()
+    if blacklist:
+        print(_("Blacklist loaded: {count} ranges").format(count=len(blacklist)))
+    else:
+        print(_("No blacklist file found, proceeding without restrictions"))
+
     print(_("Reading current configuration..."))
     try:
         current_config = config_manager.get_current_network_config()
@@ -688,18 +799,26 @@ def main():
             sys.exit(1)
 
         if args.auto or (not new_bip and not new_pools):
-            print(_("Generating valid random ranges..."))
+            print(_("Searching for first available ranges..."))
 
-            if not new_bip:
-                new_bip = IPValidator.generate_random_bip()
+            try:
+                if not new_bip:
+                    new_bip = IPValidator.generate_first_available_bip(blacklist=blacklist)
 
-            if not new_pools:
-                # Extract octet from bip to avoid conflicts
-                bip_octets = new_bip.split('.')[1]
-                avoid_octets = {int(bip_octets)}
-                new_pools = IPValidator.generate_random_pools(2, avoid_octets)
+                if not new_pools:
+                    # Extract octet from bip to avoid conflicts
+                    bip_octets = new_bip.split('.')[1]
+                    avoid_octets = {int(bip_octets)}
+                    new_pools = IPValidator.generate_first_available_pools(
+                        2,
+                        avoid_octets=avoid_octets,
+                        blacklist=blacklist
+                    )
 
-            print(_("Ranges generated without conflicts"))
+                print(_("First available ranges found without blacklist conflicts"))
+            except RuntimeError as e:
+                print(_("Error generating ranges: {error}").format(error=e))
+                sys.exit(1)
 
         if not new_bip and not new_pools:
             print(_("Error: must provide at least --bip or --pool, or use --auto"))
@@ -713,6 +832,21 @@ def main():
             if new_pools:
                 for pool in new_pools:
                     IPValidator.validate_pool_entry(pool)
+
+            # Validate manual ranges against blacklist
+            if blacklist and not args.auto:
+                all_manual_cidrs = []
+                if new_bip:
+                    all_manual_cidrs.append(new_bip)
+                if new_pools:
+                    all_manual_cidrs.extend([p['base'] for p in new_pools])
+
+                for cidr in all_manual_cidrs:
+                    success, msg = IPValidator.check_against_blacklist(cidr, blacklist)
+                    if not success:
+                        print(_("Error: manually specified range conflicts with blacklist"))
+                        print(_("  {message}").format(message=msg))
+                        sys.exit(1)
 
             # Check conflicts
             all_cidrs = []
