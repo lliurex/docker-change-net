@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: docker-change-net 1.0\n"
 "Report-Msgid-Bugs-To: M.Angel Juan\n"
-"POT-Creation-Date: 2025-12-18 13:24+0100\n"
-"PO-Revision-Date: 2025-12-18 13:25+0100\n"
+"POT-Creation-Date: 2025-12-18 15:47+0100\n"
+"PO-Revision-Date: 2025-12-18 15:57+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: es\n"
@@ -18,17 +18,17 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0.1\n"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:77
+#: /home/lliurex/git/docker-change-net/docker-change-net:80
 #, python-brace-format
 msgid "Invalid BIP CIDR '{cidr}': {error}"
 msgstr "BIP CIDR invalide '{cidr}': {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:86
+#: /home/lliurex/git/docker-change-net/docker-change-net:89
 #, python-brace-format
 msgid "Invalid pool CIDR '{cidr}': {error}"
 msgstr "Pool CIDR invalid '{cidr}': {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:109
+#: /home/lliurex/git/docker-change-net/docker-change-net:112
 #, python-brace-format
 msgid ""
 "IP {cidr} is not private (RFC 1918). Use: 10.0.0.0/8, 172.16.0.0/12, or "
@@ -37,128 +37,148 @@ msgstr ""
 "IP {cidr} no és privada (RFC 1918). Utilitzar: 10.0.0.0/8, 172.16.0.0/12, o "
 "192.168.0.0/16"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:119
+#: /home/lliurex/git/docker-change-net/docker-change-net:146
+#: /home/lliurex/git/docker-change-net/docker-change-net:154
+msgid "No blacklist conflicts"
+msgstr "Sense conflictes blacklist"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:152
+#, python-brace-format
+msgid "Conflicts with blacklist: {test} overlaps {bl}"
+msgstr "Conflicte amb blacklist: {test} i {bl} se solapen"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:162
 msgid "Pool must be a dictionary"
 msgstr "Pool deu ser un diccionari"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:122
+#: /home/lliurex/git/docker-change-net/docker-change-net:165
 msgid "Pool must contain 'base' and 'size' keys"
 msgstr "Pool deu contindre claus 'base' i 'size'"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:131
+#: /home/lliurex/git/docker-change-net/docker-change-net:174
 msgid "Size must be between 1 and 32"
 msgstr "La grandària ha de ser entre 1 i 32"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:137
+#: /home/lliurex/git/docker-change-net/docker-change-net:180
 #, python-brace-format
 msgid "Size {size} cannot be less than base mask ({mask})"
 msgstr "La grandària {size} no pot ser menor que la màscara base ({mask})"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:141
+#: /home/lliurex/git/docker-change-net/docker-change-net:184
 #, python-brace-format
 msgid "Invalid size: {error}"
 msgstr "Mida invàlida: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:189
+#: /home/lliurex/git/docker-change-net/docker-change-net:215
+msgid "Could not find available IP range in any private range (10/172/192)"
+msgstr ""
+"No puc trobar un rang IP disponible d'entre els rangs privats (10/172/192)"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:277
+#, python-brace-format
+msgid "Could not generate pool {num}: no available ranges"
+msgstr "No puc generar pool {num}: no hi ha rangs disponibles"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:292
 #, python-brace-format
 msgid "Conflict: {net1} and {net2} overlap"
 msgstr "Conflicte: {net1} and {net2} se solapen"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:191
+#: /home/lliurex/git/docker-change-net/docker-change-net:294
 msgid "No conflicts"
 msgstr "Sense conflictes"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:193
+#: /home/lliurex/git/docker-change-net/docker-change-net:296
 #, python-brace-format
 msgid "Error checking conflicts: {error}"
 msgstr "Error comprovant conflictes: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:223
+#: /home/lliurex/git/docker-change-net/docker-change-net:326
 msgid "daemon.json must contain a JSON object"
 msgstr "daemon.json deu contindre un objecte JSON"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:227
+#: /home/lliurex/git/docker-change-net/docker-change-net:330
 #, python-brace-format
 msgid "daemon.json contains invalid JSON: {error}"
 msgstr "daemon.json conté un JSON invàlid: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:230
+#: /home/lliurex/git/docker-change-net/docker-change-net:333
 #, python-brace-format
 msgid "No permissions to read {path}. Check file permissions"
 msgstr "Sense permís per a llegir {path}. Comprova els permisos del fitxer"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:246
+#: /home/lliurex/git/docker-change-net/docker-change-net:349
 #, python-brace-format
 msgid "Couldn't create backup from daemon.json: {error}"
 msgstr "No es pot crear una còpia de seguretat de daemon.json: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:295
+#: /home/lliurex/git/docker-change-net/docker-change-net:398
 #, python-brace-format
 msgid "Error writing configuration: {error}"
 msgstr "Error escrivint la configuració: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:318
+#: /home/lliurex/git/docker-change-net/docker-change-net:421
 msgid "Root user"
 msgstr "Usuari root"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:322
-#: /home/lliurex/git/docker-change-net/docker-change-net:336
+#: /home/lliurex/git/docker-change-net/docker-change-net:425
+#: /home/lliurex/git/docker-change-net/docker-change-net:439
 msgid "User in docker group"
 msgstr "Usuari en el grup docker"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:324
+#: /home/lliurex/git/docker-change-net/docker-change-net:427
 msgid "Insufficient permissions"
 msgstr "Permisos insuficients"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:331
+#: /home/lliurex/git/docker-change-net/docker-change-net:434
 msgid "Could not determine current user"
 msgstr "No puc determinar l'usuari actual"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:340
+#: /home/lliurex/git/docker-change-net/docker-change-net:443
 msgid "Docker group is primary group"
 msgstr "El grup primari docker"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:343
+#: /home/lliurex/git/docker-change-net/docker-change-net:446
 msgid "Docker group does not exist"
 msgstr "El grup docker no existix"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:345
+#: /home/lliurex/git/docker-change-net/docker-change-net:448
 msgid "User not in docker group"
 msgstr "L'usuari no està en el grup docker"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:347
+#: /home/lliurex/git/docker-change-net/docker-change-net:450
 #, python-brace-format
 msgid "Error checking group: {error}"
 msgstr "Error comprovant el grup: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:364
+#: /home/lliurex/git/docker-change-net/docker-change-net:467
 #, python-brace-format
 msgid "Error restarting Docker: {stderr}"
 msgstr "Error reiniciant Docker: {stderr}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:370
-#: /home/lliurex/git/docker-change-net/docker-change-net:791
+#: /home/lliurex/git/docker-change-net/docker-change-net:473
+#: /home/lliurex/git/docker-change-net/docker-change-net:925
 msgid "Docker restarted successfully"
 msgstr "Docker reiniciat correctament"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:372
+#: /home/lliurex/git/docker-change-net/docker-change-net:475
 msgid "Fail restarting Docker"
 msgstr "Fallada reiniciant Docker"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:375
+#: /home/lliurex/git/docker-change-net/docker-change-net:478
 msgid "Timeout restarting Docker"
 msgstr "Timeout reiniciando Docker"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:377
+#: /home/lliurex/git/docker-change-net/docker-change-net:480
 #, python-brace-format
 msgid "Unexpected error: {e}"
 msgstr "Error inesperat: {e}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:418
+#: /home/lliurex/git/docker-change-net/docker-change-net:521
 msgid "Changes Docker network range by modifying daemon.json"
 msgstr "Canvia el rang de xarxa de Docker modificant daemon.json"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:420
+#: /home/lliurex/git/docker-change-net/docker-change-net:523
 msgid ""
 "\n"
 "Usage examples:\n"
@@ -216,15 +236,15 @@ msgstr ""
 " # Mode no interactiu\n"
 " docker-change-net --auto -y\n"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:450
+#: /home/lliurex/git/docker-change-net/docker-change-net:553
 msgid "Remove bip and pools from config"
 msgstr "Eliminar bip i pools de la configuració"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:455
+#: /home/lliurex/git/docker-change-net/docker-change-net:558
 msgid "New CIDR range for default bridge (docker0)"
 msgstr "Nou rang CIDR per al pont principal (docker0)"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:462
+#: /home/lliurex/git/docker-change-net/docker-change-net:565
 msgid ""
 "Base CIDR network range for address pool (e.g., 10.20.0.0/16). This defines "
 "the complete IP range available for the pool. Docker will create subnets "
@@ -237,7 +257,7 @@ msgstr ""
 "(per defecte 24 si no s'especifica). Pot usar-se múltiples vegades per a "
 "múltiples pools."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:474
+#: /home/lliurex/git/docker-change-net/docker-change-net:577
 msgid ""
 "Subnet prefix length for networks created from the pool (1-32). This defines "
 "how large each Docker network will be. For example, size 24 creates /24 "
@@ -249,29 +269,29 @@ msgstr ""
 "crea subxarxes /24 (254 hosts cada una). Opcional, per defecte 24 si no "
 "s'especifica. Ha de ser >= la màscara de xarxa base."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:485
+#: /home/lliurex/git/docker-change-net/docker-change-net:588
 #, python-brace-format
 msgid "Path to daemon.json (default: {path})"
 msgstr "Ruta a daemon.json (per defecte: {path})"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:490
+#: /home/lliurex/git/docker-change-net/docker-change-net:593
 msgid "Directory for backups (default: same as daemon.json)"
 msgstr ""
 "Directori per a còpies de seguretat (per defecte: mateix que daemon.json)"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:495
+#: /home/lliurex/git/docker-change-net/docker-change-net:598
 msgid "Do not ask for confirmation"
 msgstr "No preguntar per confirmació"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:500
+#: /home/lliurex/git/docker-change-net/docker-change-net:603
 msgid "Generate random ranges automatically"
 msgstr "Generar rangs aleatoris automàticament"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:512
+#: /home/lliurex/git/docker-change-net/docker-change-net:615
 msgid "--pool-size provided but missing --pool-base arguments."
 msgstr "--pool-size proporcionat però falten arguments --pool-base."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:522
+#: /home/lliurex/git/docker-change-net/docker-change-net:625
 #, python-brace-format
 msgid ""
 "{bases} --pool-base argument(s) but {sizes} --pool-size argument(s). Cannot "
@@ -280,192 +300,225 @@ msgstr ""
 "{bases} com a arguments --pool-base però {sizes} com a arguments --pool-"
 "size. No pot haver-hi més sizes que bases."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:534
+#: /home/lliurex/git/docker-change-net/docker-change-net:637
 msgid "CURRENT CONFIGURATION FOR DOCKER DAEMON:"
 msgstr "CONFIGURACIÓ ACTUAL PER AL DAEMON DE DOCKER:"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:540
+#: /home/lliurex/git/docker-change-net/docker-change-net:643
 #, python-brace-format
 msgid "Default bridge (bip): {bip}"
 msgstr "Pont per defecte (bip): {bip}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:542
+#: /home/lliurex/git/docker-change-net/docker-change-net:645
 msgid "Default bridge (bip): Not configured"
 msgstr "Pont per defecte (bip): No configurat"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:545
-#: /home/lliurex/git/docker-change-net/docker-change-net:569
-#: /home/lliurex/git/docker-change-net/docker-change-net:575
+#: /home/lliurex/git/docker-change-net/docker-change-net:648
+#: /home/lliurex/git/docker-change-net/docker-change-net:672
+#: /home/lliurex/git/docker-change-net/docker-change-net:678
 msgid "Address pools:"
 msgstr "Pools de direccions:"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:551
+#: /home/lliurex/git/docker-change-net/docker-change-net:654
 msgid "Address pools: Not configured"
 msgstr "Pools de direccions: No configurats"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:555
+#: /home/lliurex/git/docker-change-net/docker-change-net:658
 msgid "PROPOSED CHANGES:"
 msgstr "CANVIS PROPOSATS:"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:558
-#: /home/lliurex/git/docker-change-net/docker-change-net:565
-#: /home/lliurex/git/docker-change-net/docker-change-net:575
+#: /home/lliurex/git/docker-change-net/docker-change-net:661
+#: /home/lliurex/git/docker-change-net/docker-change-net:668
+#: /home/lliurex/git/docker-change-net/docker-change-net:678
 msgid "Not configured"
 msgstr "No configurat"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:561
-#: /home/lliurex/git/docker-change-net/docker-change-net:565
+#: /home/lliurex/git/docker-change-net/docker-change-net:664
+#: /home/lliurex/git/docker-change-net/docker-change-net:668
 #, python-brace-format
 msgid "Default bridge (bip): {current} → {new}"
 msgstr "Pont per defecte (bip): {current} → {new}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:563
+#: /home/lliurex/git/docker-change-net/docker-change-net:666
 #, python-brace-format
 msgid "Default bridge (bip): {bip} (no changes)"
 msgstr "Pont per defecte (bip): {bip} (sense canvis)"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:579
+#: /home/lliurex/git/docker-change-net/docker-change-net:682
 msgid "WARNING: Restarting Docker will stop all running containers"
 msgstr ""
 "ADVERTIMENT: Reiniciar Docker detindrà tots els contenidors en execució"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:582
+#: /home/lliurex/git/docker-change-net/docker-change-net:685
 msgid "Apply changes?"
 msgstr "¿Aplicar camvis?"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:588
+#: /home/lliurex/git/docker-change-net/docker-change-net:691
 msgid "Please answer"
 msgstr "Per favor responga"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:593
+#: /home/lliurex/git/docker-change-net/docker-change-net:696
 msgid "Docker Network Configuration Changer"
 msgstr "Canviador de Configuració de Xarxa de Docker"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:601
+#: /home/lliurex/git/docker-change-net/docker-change-net:704
 msgid "CHANGES APPLIED SUCCESSFULLY"
 msgstr "CANVIS APLICATS CORRECTAMENT"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:605
+#: /home/lliurex/git/docker-change-net/docker-change-net:708
 #, python-brace-format
 msgid "Backup available at: {path}"
 msgstr "Còpia de seguretat disponible en: {path}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:606
+#: /home/lliurex/git/docker-change-net/docker-change-net:709
 msgid "To manually restore:"
 msgstr "Per a restaurar manualment:"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:630
+#: /home/lliurex/git/docker-change-net/docker-change-net:733
 msgid "Elevating privileges (requires docker group membership)..."
 msgstr "Elevant privilegis (requerix filiació en el grup docker)..."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:645
+#: /home/lliurex/git/docker-change-net/docker-change-net:748
 msgid "Error insufficient permissions"
 msgstr "Error de permisos insuficients"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:653
+#: /home/lliurex/git/docker-change-net/docker-change-net:756
 msgid "Docker is not installed"
 msgstr "Docker no està instal·lat"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:656
+#: /home/lliurex/git/docker-change-net/docker-change-net:759
 #, python-brace-format
 msgid "Docker installed ({version})"
 msgstr "Docker instal·lat ({version})"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:660
+#: /home/lliurex/git/docker-change-net/docker-change-net:764
+msgid "Loading blacklist..."
+msgstr "Carregant blacklist..."
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:767
+#, python-brace-format
+msgid "Blacklist loaded: {count} ranges"
+msgstr "Blacklist carregada: {count} rangs"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:769
+msgid "No blacklist file found, proceeding without restrictions"
+msgstr "No hi ha fitxer de blacklist, continuant sense restriccions"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:771
 msgid "Reading current configuration..."
 msgstr "Llegint configuració actual..."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:664
+#: /home/lliurex/git/docker-change-net/docker-change-net:775
 msgid "daemon.json found"
 msgstr "daemon.json trovat"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:667
+#: /home/lliurex/git/docker-change-net/docker-change-net:778
 msgid "daemon.json does not exist, nothing to do"
 msgstr "daemon.json no existe, res a fer"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:670
+#: /home/lliurex/git/docker-change-net/docker-change-net:781
 msgid "daemon.json does not exist, will create a new one"
 msgstr "daemon.json no existix, es crearà un nou"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:672
-#: /home/lliurex/git/docker-change-net/docker-change-net:687
-#: /home/lliurex/git/docker-change-net/docker-change-net:727
-#: /home/lliurex/git/docker-change-net/docker-change-net:756
-#: /home/lliurex/git/docker-change-net/docker-change-net:765
-#: /home/lliurex/git/docker-change-net/docker-change-net:772
-#: /home/lliurex/git/docker-change-net/docker-change-net:784
+#: /home/lliurex/git/docker-change-net/docker-change-net:783
+#: /home/lliurex/git/docker-change-net/docker-change-net:798
+#: /home/lliurex/git/docker-change-net/docker-change-net:861
+#: /home/lliurex/git/docker-change-net/docker-change-net:890
+#: /home/lliurex/git/docker-change-net/docker-change-net:899
+#: /home/lliurex/git/docker-change-net/docker-change-net:906
+#: /home/lliurex/git/docker-change-net/docker-change-net:918
 #, python-brace-format
 msgid "Error: {error}"
 msgstr "Error: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:691
-msgid "Generating valid random ranges..."
-msgstr "Generant rangs aleatoris vàlids..."
+#: /home/lliurex/git/docker-change-net/docker-change-net:802
+msgid "Searching for first available ranges..."
+msgstr "Buscant pels primers rangs disponibles..."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:702
-msgid "Ranges generated without conflicts"
-msgstr "Rangs generats sense conflictes"
+#: /home/lliurex/git/docker-change-net/docker-change-net:818
+msgid "First available ranges found without blacklist conflicts"
+msgstr "Primers rangs disponibles trobats sense conflictes amb la blacklist"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:705
+#: /home/lliurex/git/docker-change-net/docker-change-net:820
+#, python-brace-format
+msgid "Error generating ranges: {error}"
+msgstr "Error generant rangs: {error}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:824
 msgid "Error: must provide at least --bip or --pool, or use --auto"
 msgstr "Error: ha de proporcionar almenys --bip o --pool, o usar --auto"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:731
+#: /home/lliurex/git/docker-change-net/docker-change-net:847
+msgid "Error: manually specified range conflicts with blacklist"
+msgstr "Error: rang especificat manualment té conflictes amb la blacklist"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:848
+#, python-brace-format
+msgid "  {message}"
+msgstr "  {message}"
+
+#: /home/lliurex/git/docker-change-net/docker-change-net:865
 #, python-brace-format
 msgid "Error: validation failed: {error}"
 msgstr "Error: validació fallida: {error}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:738
+#: /home/lliurex/git/docker-change-net/docker-change-net:872
 msgid "Same values that current configuration"
 msgstr "Mateixos valors que la configuració actual"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:739
+#: /home/lliurex/git/docker-change-net/docker-change-net:873
 msgid "No changes to apply"
 msgstr "No hi ha canvis que aplicar"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:746
-#: /home/lliurex/git/docker-change-net/docker-change-net:801
+#: /home/lliurex/git/docker-change-net/docker-change-net:880
+#: /home/lliurex/git/docker-change-net/docker-change-net:935
 msgid "Operation cancelled by user"
 msgstr "Operació cancel·lada per l'usuari"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:751
+#: /home/lliurex/git/docker-change-net/docker-change-net:885
 msgid "Creating backup..."
 msgstr "Creant còpia de seguretat..."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:754
+#: /home/lliurex/git/docker-change-net/docker-change-net:888
 #, python-brace-format
 msgid "Backup created: {path}"
 msgstr "Còpia de seguretat creada: {path}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:759
+#: /home/lliurex/git/docker-change-net/docker-change-net:893
 msgid "Writing new configuration..."
 msgstr "Escrivint nova configuració..."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:763
+#: /home/lliurex/git/docker-change-net/docker-change-net:897
 msgid "Configuration updated"
 msgstr "Configuració actualitzada"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:768
+#: /home/lliurex/git/docker-change-net/docker-change-net:902
 msgid "Restarting Docker service..."
 msgstr "Reiniciant el servici Docker..."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:776
+#: /home/lliurex/git/docker-change-net/docker-change-net:910
 msgid "Attempting to restore previous configuration..."
 msgstr "Intentant restaurar la configuració anterior..."
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:782
+#: /home/lliurex/git/docker-change-net/docker-change-net:916
 #, python-brace-format
 msgid "Rollback: {message}"
 msgstr "Rollback: {message}"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:785
+#: /home/lliurex/git/docker-change-net/docker-change-net:919
 msgid "Manual restoration required:"
 msgstr "Restauració manual requerida:"
 
-#: /home/lliurex/git/docker-change-net/docker-change-net:804
+#: /home/lliurex/git/docker-change-net/docker-change-net:938
 #, python-brace-format
 msgid "Unexpected error: {error}"
 msgstr "Error inesperat: {error}"
+
+#~ msgid "Generating valid random ranges..."
+#~ msgstr "Generant rangs aleatoris vàlids..."
+
+#~ msgid "Ranges generated without conflicts"
+#~ msgstr "Rangs generats sense conflictes"
 
 #, python-brace-format
 #~ msgid "IP {cidr_string} is not private (RFC 1918). "
