@@ -5,3 +5,4 @@ translations/es/LC_MESSAGES/docker-change-net.mo /usr/share/locale/es_ES.UTF-8/L
 translations/va/LC_MESSAGES/docker-change-net.mo /usr/share/locale/ca_ES/LC_MESSAGES
 translations/va/LC_MESSAGES/docker-change-net.mo /usr/share/locale/ca_ES.UTF-8/LC_MESSAGES
 translations/va/LC_MESSAGES/docker-change-net.mo /usr/share/locale/ca_ES@valencia/LC_MESSAGES
+blacklist.txt /usr/share/docker-change-net
