@@ -1,3 +1,9 @@
+docker-change-net (0.2) jammy; urgency=medium
+
+  * Include missing blacklist file
+
+ -- M.Angel Juan <m.angel.juan@gmail.com>  Tue, 20 Jan 2026 14:24:36 +0100
+
 docker-change-net (0.1) jammy; urgency=medium
 
   * Initial Release.
